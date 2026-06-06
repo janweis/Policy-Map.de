@@ -1,0 +1,39 @@
+name: "💡 Feature request / Funktionswunsch"
+description: "Suggest an idea or improvement. / Eine Idee oder Verbesserung vorschlagen."
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für deine Idee! / Thanks for your idea!
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem / Use-Case"
+      description: "Welches Problem löst die Idee? Wann tritt es auf? / What problem does this solve? When does it occur?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "Vorschlag / Proposed solution"
+      description: "Wie sollte es idealerweise funktionieren? / How should it ideally work?"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternativen / Alternatives considered"
+    validations:
+      required: false
+  - type: dropdown
+    id: vendor
+    attributes:
+      label: "Betrifft Hersteller / Affects vendor"
+      options:
+        - "Alle / All"
+        - FortiGate
+        - FortiManager
+        - Sophos XGS
+    validations:
+      required: false

@@ -1,0 +1,21 @@
+# Exported firewall rule bases — NEVER commit (contain real configuration)
+firewall-rohdaten-*.json
+*-rohdaten-*.json
+
+# Secrets / credentials
+*.env
+.env*
+*secret*
+*token*
+*.pfx
+*.key
+
+# Editor / backup leftovers
+*.bak
+*.swp
+*~
+
+# OS / OneDrive cruft
+Thumbs.db
+desktop.ini
+.DS_Store

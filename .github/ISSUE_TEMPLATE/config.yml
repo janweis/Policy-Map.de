@@ -1,0 +1,12 @@
+# Force the two structured forms above; no free-form blank issues.
+blank_issues_enabled: false
+contact_links:
+  - name: "🌐 Open the Policy Map tool / Tool öffnen"
+    url: https://policy-map.it-explorations.de
+    about: "Try the live tool before filing an issue. / Vor dem Issue zunächst das Live-Tool ausprobieren."
+  - name: "💬 Discussions / Fragen & Austausch"
+    url: https://github.com/<OWNER>/PolicyMap/discussions
+    about: "Questions and general discussion. / Fragen und allgemeiner Austausch."
+  - name: "🔒 Report a security vulnerability / Sicherheitslücke melden"
+    url: https://github.com/<OWNER>/PolicyMap/security/advisories/new
+    about: "Private vulnerability reporting via GitHub — never a public issue. / Private Meldung über GitHub — kein öffentliches Issue."

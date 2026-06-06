@@ -1,0 +1,10 @@
+# Normalize line endings deterministically.
+* text=auto
+
+# PowerShell runs reliably with CRLF on Windows targets.
+*.ps1 text eol=crlf
+
+# Keep docs/config LF.
+*.md  text eol=lf
+*.yml text eol=lf
+LICENSE text eol=lf
