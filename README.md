@@ -1,5 +1,3 @@
-<!-- TODO before publishing: replace every <OWNER> with the real GitHub account/org handle. -->
-
 # Policy Map
 
 **Visual firewall policy analysis for FortiGate, FortiManager & Sophos.**
@@ -50,8 +48,8 @@ No Python, no installation, no account. Details and parameters: [`Export-Skripte
 
 ## Issues & feature requests
 
-Bugs and ideas belong here: **[open an issue](https://github.com/<OWNER>/PolicyMap/issues/new/choose)**.
-Questions and discussion: **[Discussions](https://github.com/<OWNER>/PolicyMap/discussions)**.
+Bugs and ideas belong here: **[open an issue](https://github.com/janweis/Policy-Map.de/issues/new/choose)**.
+Questions and discussion: **[Discussions](https://github.com/janweis/Policy-Map.de/discussions)**.
 Security reports: see **[SECURITY.md](SECURITY.md)** (private vulnerability reporting via GitHub).
 
 ## License

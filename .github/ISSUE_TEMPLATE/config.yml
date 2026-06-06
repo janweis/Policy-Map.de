@@ -5,8 +5,8 @@ contact_links:
     url: https://policy-map.it-explorations.de
     about: "Try the live tool before filing an issue. / Vor dem Issue zunächst das Live-Tool ausprobieren."
   - name: "💬 Discussions / Fragen & Austausch"
-    url: https://github.com/<OWNER>/PolicyMap/discussions
+    url: https://github.com/janweis/Policy-Map.de/discussions
     about: "Questions and general discussion. / Fragen und allgemeiner Austausch."
   - name: "🔒 Report a security vulnerability / Sicherheitslücke melden"
-    url: https://github.com/<OWNER>/PolicyMap/security/advisories/new
+    url: https://github.com/janweis/Policy-Map.de/security/advisories/new
     about: "Private vulnerability reporting via GitHub — never a public issue. / Private Meldung über GitHub — kein öffentliches Issue."

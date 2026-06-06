@@ -1,5 +1,3 @@
-<!-- TODO vor Veröffentlichung: jedes <OWNER> durch das echte GitHub-Konto/die Org ersetzen. -->
-
 # Policy Map
 
 **Visuelle Firewall-Regelwerk-Analyse für FortiGate, FortiManager & Sophos.**
@@ -52,8 +50,8 @@ Kein Python, keine Installation, kein Konto. Details und Parameter: [`Export-Skr
 
 ## Issues & Feature-Requests
 
-Fehler und Ideen gehören hierher: **[Issue anlegen](https://github.com/<OWNER>/PolicyMap/issues/new/choose)**.
-Fragen und Austausch: **[Discussions](https://github.com/<OWNER>/PolicyMap/discussions)**.
+Fehler und Ideen gehören hierher: **[Issue anlegen](https://github.com/janweis/Policy-Map.de/issues/new/choose)**.
+Fragen und Austausch: **[Discussions](https://github.com/janweis/Policy-Map.de/discussions)**.
 Sicherheitsmeldungen: siehe **[SECURITY.md](SECURITY.md)** (private Meldung über GitHub).
 
 ## Lizenz
