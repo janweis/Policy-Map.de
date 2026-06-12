@@ -161,8 +161,9 @@ Write-Host '[INFO] Lade VIPs / NAT-Ziele ...' -ForegroundColor Cyan
 $vips = Get-Cmdb -Path '/cmdb/firewall/vip'
 
 Write-Host '[INFO] Lade Services / Service-Gruppen ...' -ForegroundColor Cyan
-$svcs = Get-Cmdb -Path '/cmdb/firewall/service/custom'
-$svcGrps = Get-Cmdb -Path '/cmdb/firewall/service/group'
+# CLI-Zweiwort-Kategorie "firewall service" → im FortiOS-REST-Pfad mit Punkt (firewall.service)
+$svcs = Get-Cmdb -Path '/cmdb/firewall.service/custom'
+$svcGrps = Get-Cmdb -Path '/cmdb/firewall.service/group'
 
 # ── Normalisieren (gemeinsames Roh-Schema, vom Browser-Konverter konsumiert) ─
 # IPv4 + IPv6 in dieselben Listen mergen
