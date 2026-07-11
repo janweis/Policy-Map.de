@@ -85,6 +85,15 @@ function Names($seq) {
     @(ToArray $seq | ForEach-Object { if ($_ -is [string]) { $_ } elseif ($_.name) { [string]$_.name } } | Where-Object { $_ })
 }
 
+# Wie Names, akzeptiert aber auch {id=N}-Mitglieder (FortiOS internet-service-id-Tabellen).
+function NamesOrIds($seq) {
+    @(ToArray $seq | ForEach-Object {
+        if ($_ -is [string] -or $_ -is [int] -or $_ -is [long]) { [string]$_ }
+        elseif ($_.name) { [string]$_.name }
+        elseif ($null -ne $_.id) { [string]$_.id }
+    } | Where-Object { $_ })
+}
+
 # FortiOS VIP-mappedip ist eine Tabelle [{range=x.x.x.x}, …] → ersten Range als String.
 function MappedIp($v) {
     foreach ($m in (ToArray $v)) {
@@ -160,10 +169,15 @@ $pols6 = Get-CmdbOptional -Path '/cmdb/firewall/policy6'
 Write-Host '[INFO] Lade VIPs / NAT-Ziele ...' -ForegroundColor Cyan
 $vips = Get-Cmdb -Path '/cmdb/firewall/vip'
 
-Write-Host '[INFO] Lade Services / Service-Gruppen ...' -ForegroundColor Cyan
 # CLI-Zweiwort-Kategorie "firewall service" → im FortiOS-REST-Pfad mit Punkt (firewall.service)
+Write-Host '[INFO] Lade Services / Service-Gruppen ...' -ForegroundColor Cyan
 $svcs = Get-Cmdb -Path '/cmdb/firewall.service/custom'
 $svcGrps = Get-Cmdb -Path '/cmdb/firewall.service/group'
+
+# Zeitplan-Definitionen (CLI "firewall schedule" → REST-Pfad firewall.schedule) - tolerant abrufen
+Write-Host '[INFO] Lade Zeitplaene (onetime + recurring) ...' -ForegroundColor Cyan
+$schedOne = Get-CmdbOptional -Path '/cmdb/firewall.schedule/onetime'
+$schedRec = Get-CmdbOptional -Path '/cmdb/firewall.schedule/recurring'
 
 # ── Normalisieren (gemeinsames Roh-Schema, vom Browser-Konverter konsumiert) ─
 # IPv4 + IPv6 in dieselben Listen mergen
@@ -194,6 +208,20 @@ $policiesOut = foreach ($p in (@(ToArray $pols.results) + @(ToArray $pols6.resul
         logtraffic          = [string]$p.logtraffic
         comments            = [string]$p.comments
         'global-label'      = [string]$p.'global-label'
+        # Erweiterte Felder (Gap-Kategorie A): ISDB-Ziele, Negation, Identitaet, NAT-Pool
+        'internet-service'          = [string]$p.'internet-service'
+        'internet-service-name'     = @(Names $p.'internet-service-name')
+        'internet-service-id'       = @(NamesOrIds $p.'internet-service-id')
+        'internet-service-src'      = [string]$p.'internet-service-src'
+        'internet-service-src-name' = @(Names $p.'internet-service-src-name')
+        'internet-service-src-id'   = @(NamesOrIds $p.'internet-service-src-id')
+        'srcaddr-negate'            = [string]$p.'srcaddr-negate'
+        'dstaddr-negate'            = [string]$p.'dstaddr-negate'
+        'service-negate'            = [string]$p.'service-negate'
+        users                       = @(Names $p.users)
+        groups                      = @(Names $p.groups)
+        ippool                      = [string]$p.ippool
+        poolname                    = @(Names $p.poolname)
     }
 }
 
@@ -209,6 +237,17 @@ $servicesOut = foreach ($s in (ToArray $svcs.results)) {
 $serviceGroupsOut = foreach ($g in (ToArray $svcGrps.results)) {
     [ordered]@{ name = [string]$g.name; member = @(Names $g.member) }
 }
+
+# Gemeinsame Schedule-Form: name/type/start/end/day (recurring: day als Leerzeichen-Liste)
+$schedulesOut = @(
+    foreach ($s in (ToArray $schedOne.results)) {
+        [ordered]@{ name = [string]$s.name; type = 'onetime'; start = [string]$s.start; end = [string]$s.end; day = '' }
+    }
+) + @(
+    foreach ($s in (ToArray $schedRec.results)) {
+        [ordered]@{ name = [string]$s.name; type = 'recurring'; start = [string]$s.start; end = [string]$s.end; day = [string]$s.day }
+    }
+)
 
 $vipsOut = foreach ($v in (ToArray $vips.results)) {
     [ordered]@{
@@ -231,6 +270,7 @@ $output = [ordered]@{
     vips           = @($vipsOut)
     services       = @($servicesOut)
     service_groups = @($serviceGroupsOut)
+    schedules      = @($schedulesOut)
 }
 
 $output | ConvertTo-Json -Depth 30 | Out-File -FilePath $OutFile -Encoding utf8

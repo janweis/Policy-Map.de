@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Exportiert Sophos-XGS-Firewall-Daten als ROH-JSON (vendor-getaggt) für die Firewall Policy Map.
 
@@ -34,15 +34,54 @@ if (-not $OutFile)  { $OutFile  = Join-Path $PSScriptRoot 'firewall-rohdaten-sop
 $SkipCert = $Insecure.IsPresent
 if ($SkipCert) { Write-Warning 'SSL-Zertifikatsvalidierung deaktiviert (-Insecure)!' }
 
+# Windows PowerShell 5.1 kennt -SkipCertificateCheck nicht → TLS 1.2 erzwingen und
+# die Zertifikatsprüfung bei -Insecure prozessweit abschalten.
+$PS5 = $PSVersionTable.PSVersion.Major -lt 6
+if ($PS5) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    if ($SkipCert) {
+        if (-not ('TrustAllCertsPolicy' -as [type])) {
+            Add-Type @"
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+public class TrustAllCertsPolicy : ICertificatePolicy {
+    public bool CheckValidationResult(ServicePoint sp, X509Certificate cert, WebRequest req, int problem) { return true; }
+}
+"@
+        }
+        [Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+    }
+}
+
 $BaseUrl = "https://${FwHost}:4444/webconsole/APIController"
 Add-Type -AssemblyName System.Web
+
+# Sicheres XML-Parsing: DTD-Verarbeitung verbieten und keinen externen Resolver
+# zulassen → schützt vor XXE und Entity-Expansion-DoS (Billion-Laughs) durch eine
+# bösartige/kompromittierte Gegenstelle. (Pendant zu defusedxml im Python-Modul.)
+function ConvertTo-SafeXml ([string]$Content) {
+    $settings = [System.Xml.XmlReaderSettings]::new()
+    $settings.DtdProcessing = [System.Xml.DtdProcessing]::Prohibit
+    $settings.XmlResolver   = $null
+    $sr = [System.IO.StringReader]::new($Content)
+    try {
+        $reader = [System.Xml.XmlReader]::Create($sr, $settings)
+        try {
+            $doc = [System.Xml.XmlDocument]::new()
+            $doc.Load($reader)
+            return $doc
+        } finally { $reader.Dispose() }
+    } finally { $sr.Dispose() }
+}
 
 function Invoke-SophosAPI {
     param([string]$ReqXml)
     $body = "reqxml=$([System.Web.HttpUtility]::UrlEncode($ReqXml))"
-    $resp = Invoke-WebRequest -Uri $BaseUrl -Method POST -Body $body `
-        -ContentType 'application/x-www-form-urlencoded' -UseBasicParsing -SkipCertificateCheck:$script:SkipCert
-    return [xml]$resp.Content
+    $iwr = @{ Uri = $BaseUrl; Method = 'POST'; Body = $body
+              ContentType = 'application/x-www-form-urlencoded'; UseBasicParsing = $true }
+    if (-not $script:PS5 -and $script:SkipCert) { $iwr.SkipCertificateCheck = $true }
+    $resp = Invoke-WebRequest @iwr
+    return ConvertTo-SafeXml $resp.Content
 }
 
 function Get-SophosEntities {

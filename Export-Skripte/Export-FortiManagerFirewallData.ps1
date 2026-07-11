@@ -162,6 +162,21 @@ try {
     $svcs = (Invoke-FMG -Method 'get' -Url "/pm/config/adom/$Adom/obj/firewall/service/custom" -Options @('object member')).result[0].data
     $svcGroups = (Invoke-FMG -Method 'get' -Url "/pm/config/adom/$Adom/obj/firewall/service/group" -Options @('object member')).result[0].data
 
+    # Zeitplan-Definitionen (gemeinsame Form name/type/start/end/day) - tolerant abrufen
+    Write-Host '[INFO] Lade Zeitplaene (onetime + recurring) ...' -ForegroundColor Cyan
+    $schedules = @()
+    try {
+        foreach ($s in @((Invoke-FMG -Method 'get' -Url "/pm/config/adom/$Adom/obj/firewall/schedule/onetime").result[0].data)) {
+            if ($s) { $schedules += [ordered]@{ name = [string]$s.name; type = 'onetime'; start = [string]$s.start; end = [string]$s.end; day = '' } }
+        }
+        foreach ($s in @((Invoke-FMG -Method 'get' -Url "/pm/config/adom/$Adom/obj/firewall/schedule/recurring").result[0].data)) {
+            if ($s) { $schedules += [ordered]@{ name = [string]$s.name; type = 'recurring'; start = [string]$s.start; end = [string]$s.end; day = [string]($s.day -join ' ') } }
+        }
+    }
+    catch {
+        Write-Host '[INFO] Zeitplaene nicht abrufbar - uebersprungen.' -ForegroundColor DarkGray
+    }
+
     if ($Device) {
         Write-Host "[INFO] Lade Policies von Gerät '$Device' (VDOM $Vdom, IPv4 + IPv6) ..." -ForegroundColor Cyan
         $policies = @((Invoke-FMG -Method 'get' -Url "/pm/config/device/$Device/vdom/$Vdom/firewall/policy").result[0].data)
@@ -209,6 +224,7 @@ try {
         vips           = @($vips)
         services       = @($svcs)
         service_groups = @($svcGroups)
+        schedules      = @($schedules)
     }
     if ($Device) {
         $output.device = $Device
